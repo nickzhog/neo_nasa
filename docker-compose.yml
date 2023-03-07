@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.neonasa
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      SERVER_ADDRESS: "server:8080"
+      API_KEY: "DEMO_KEY"
+      DATABASE_DSN: "postgresql://user:password@postgres:5432/neo_nasa?sslmode=disable"
+      UPDATE_INTERVAL: 100ms
+    networks:
+      - my-neo-network
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: neo_nasa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - my-neo-network
+
+volumes:
+  postgres_data:
+
+
+networks:
+  my-neo-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
